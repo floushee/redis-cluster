@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+
+  proxy:
+    container_name: redis_proxy
+    image: haproxy
+    deploy:
+      replicas: 1
+    volumes:
+      - ./proxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - 8080:8080
+      - 6379:6379
+      - 6380:6380
+    networks:
+      redis_network:
+        ipv4_address: 10.0.0.2
+
+  redis_main_01:
+    container_name: redis_main_01
+    image: redis
+    volumes:
+      - ./master/redis.conf:/etc/redis/redis.conf
+      - ./master/sentinel.conf:/etc/redis/sentinel.conf
+      - ./master/entrypoint.sh:/entrypoint.sh
+    command: /entrypoint.sh
+    networks:
+      redis_network:
+        ipv4_address: 10.0.0.10
+
+  redis_buddy_01:
+    container_name: redis_buddy_01
+    image: redis
+    volumes:
+      - ./slave/redis.conf:/etc/redis/redis.conf
+      - ./slave/sentinel.conf:/etc/redis/sentinel.conf
+      - ./slave/entrypoint.sh:/entrypoint.sh
+    entrypoint: /entrypoint.sh
+    networks:
+      redis_network:
+        ipv4_address: 10.0.0.20
+
+  redis_buddy_02:
+    container_name: redis_buddy_02
+    image: redis
+    volumes:
+      - ./slave/redis.conf:/etc/redis/redis.conf
+      - ./slave/sentinel.conf:/etc/redis/sentinel.conf
+      - ./slave/entrypoint.sh:/entrypoint.sh
+    entrypoint: /entrypoint.sh
+    networks:
+      redis_network:
+        ipv4_address: 10.0.0.21
+
+networks:
+  redis_network:
+    name: redis_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1

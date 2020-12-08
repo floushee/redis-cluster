@@ -1,3 +1,2 @@
 # My redis playgroud
-I am using this playground to learn about redis and high availability.
- 
+I am using this playground to learn about redis and high availability. The setup is based on this [blog post](https://www.willandskill.se/en/setup-a-highly-available-redis-cluster-with-sentinel-and-haproxy/).
